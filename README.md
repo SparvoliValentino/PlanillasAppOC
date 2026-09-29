@@ -1,36 +1,167 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Optica App
 
-## Getting Started
+Aplicación web para digitalizar y gestionar las fichas de pacientes de una
+óptica. Reemplaza la ficha física tradicional por una ficha digital
+**horizontal** que se renderiza con datos estructurados (no con la foto),
+guardando la misma disposición visual del papel.
 
-First, run the development server:
+> **Estado**: V1 cerrada y usable en local (mock-first).
+> Ver `odd/tasks/optica-app-v1.md` para el tracking, `odd/sessions/2026-09-29.md`
+> para el detalle de la última sesión, y `odd/decisions/optica-app-v1.md`
+> para las decisiones técnicas.
+>
+> Contexto original: `~/Downloads/Optica_App_Contexto_IA_Codigo_v1.pdf`.
+> Imágenes de referencia de la ficha física: `odd/reference/ficha-{frente,dorso}.png`.
+
+## Características implementadas (V1)
+
+- **CRUD de fichas** completo: listado paginado, búsqueda, detalle horizontal, crear, editar.
+- **Réplica visual del papel**: N° de ficha gigante arriba a la derecha, líneas horizontales y verticales que separan bloques, etiquetas en itálica, checkboxes literales ☐/☑, look "formulario" en cada cara (header, cuerpo, dorso).
+- **Formateador de fechas con input numérico**: el usuario tipea solo dígitos y la fecha se arma sola en `DD/MM/AAAA` (con soporte para paste de cualquier formato y backspace progresivo).
+- **Normalizadores es-AR**: importes `$ 1.234,56`, graduaciones `+1,75 → +1.75`, fechas `29/09/2026`, teléfonos, documentos.
+- **Persistencia atómica** en JSON local con `MockFichaRepository` (mutex en memoria para `NRO_FICHA`).
+- **Shell sidebar + topbar** con paleta teal, buscador global, KPIs en el listado.
+- **80 tests passing** cubriendo normalizadores, schema Zod, mock repo, use cases y formateador de fechas.
+- **Idioma**: español rioplatense en UI, inglés en código.
+
+## Stack
+
+- **Next.js 16** (App Router) + **React 19**.
+- **TypeScript estricto** (`strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noFallthroughCasesInSwitch`).
+- **Tailwind v4** (CSS-first, sin `tailwind.config.ts`).
+- **shadcn/ui 4** (preset `base-nova`; `@base-ui/react` no expone `asChild`).
+- **Zod** para validación.
+- **Vitest** para tests.
+
+## Comandos
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev        # Dev server en http://localhost:3000
+npm run build      # Build de producción
+npm run start      # Sirve el build
+npm run lint       # ESLint
+npm run typecheck  # tsc --noEmit
+npm run test       # Vitest (80 tests)
+npm run test:watch # Vitest en modo watch
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Estructura
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+  app/
+    layout.tsx                 # Shell desktop: Sidebar + Topbar + Content
+    page.tsx                   # Home con cards de acceso rápido
+    globals.css                # Tailwind v4 + tema teal
+    api/
+      fichas/route.ts          # GET (list) + POST (create)
+      fichas/[numero]/route.ts # GET + PUT
+    fichas/
+      page.tsx                 # Listado + buscador + KPIs + paginación
+      nueva/page.tsx           # Formulario vacío
+      [numero]/page.tsx        # Detalle / Editar (read/edit toggle)
+  components/
+    layout/
+      Sidebar.tsx              # 240px, íconos Lucide, item activo teal
+      Topbar.tsx               # 64px sticky, buscador global
+      KpiCard.tsx              # Tarjetas con íconos de color
+    ui/                        # Primitivas shadcn
+  features/
+    fichas/
+      domain/                  # Tipos, schema Zod, normalizadores
+        ficha.types.ts
+        ficha.schema.ts
+        normalizers.ts         # parseFecha, parseImporte, normalizeGraduacion, …
+        sheetMapping.ts        # Orden estable de columnas (Anexo B)
+        repository.ts          # interface FichaRepository (PDF §7.2)
+      application/             # 4 use cases puros
+        listFichas.ts
+        getFicha.ts
+        createFicha.ts
+        updateFicha.ts
+      infrastructure/
+        mockFichaRepository.ts # JSON local con mutex atómico
+        seed.ts                # 5 fichas de ejemplo
+      ui/
+        DateInput.tsx          # Input numérico → DD/MM/AAAA → ISO
+        dateInputLogic.ts      # Lógica pura testeable
+        FichaCard.tsx          # Vista horizontal de lectura
+        FichaForm.tsx          # Vista horizontal de edición
+        format.ts              # formatDate (es-AR)
+        paper/
+          PaperField.tsx       # Label + línea (read) / input underline (edit)
+          PaperCheckbox.tsx    # ☐/☑ unicode (read) / nativo (edit)
+          PaperDateField.tsx   # PaperField + DateInput
+          PaperLayout.tsx      # PaperCard / PaperFace / PaperBody / PaperHeader
+        sections/
+          IdentificacionSection.tsx
+          RecetaSection.tsx
+          GraduacionBlock.tsx
+          LejosCercaSection.tsx
+          MedidasSection.tsx
+          TipoLenteSection.tsx
+          EconomicoSection.tsx
+          CoberturaSection.tsx
+  lib/
+    config/repository.ts       # Singleton factory (mock por default)
+    http/{errors,respond}.ts   # Helpers para los API routes
+    utils.ts                   # cn helper
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+odd/
+  tasks/optica-app-v1.md       # Tracking de la feature
+  decisions/optica-app-v1.md   # Decisiones técnicas con justificación
+  sessions/2026-09-29.md       # Resumen de la sesión para retomar
+  reference/                   # Imágenes extraídas del PDF (frente/dorso de la ficha)
+    ficha-frente.png
+    ficha-dorso.png
+```
 
-## Learn More
+## Persistencia (V1 mock)
 
-To learn more about Next.js, take a look at the following resources:
+- Las fichas viven en `.data/fichas.json` (gitignored).
+- En el primer arranque se siembran 5 fichas de ejemplo.
+- `NRO_FICHA` se asigna con un mutex en memoria para evitar colisiones durante creates concurrentes.
+- Cambiar la ruta del archivo: `FICHA_REPOSITORY_PATH=/tmp/otro.json npm run start`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Cómo interactúan las fechas
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- El modelo de dominio guarda ISO `YYYY-MM-DD` (formato canónico).
+- Los **normalizadores** (`parseFecha`, `parseFechaLenient`) aceptan ISO, es-AR `DD/MM/AAAA`, `DD-MM-AAAA`, `DD.MM.AA`, "29 de septiembre de 2026".
+- El **`DateInput`** es el componente UI para fechas en formularios. El usuario tipea solo dígitos y la fecha se auto-formatea a `DD/MM/AAAA`. La lógica pura está en `dateInputLogic.ts` (testeable sin DOM).
+- El **`PaperDateField`** envuelve `DateInput` con el look paper (underline dashed en read/edit).
+- En read mode, `formatDate()` (en `format.ts`) muestra ISO como `DD/MM/AAAA`.
 
-## Deploy on Vercel
+## Conectar Google Sheets (próxima iteración)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Crear una hoja `FICHAS` con el orden de columnas de `src/features/fichas/domain/sheetMapping.ts` (espejo del Anexo B del PDF).
+2. Crear un Apps Script que exponga los 4 verbos del contrato `FichaRepository` (`list`, `getByNumber`, `create`, `update`). Para atomicidad de `NRO_FICHA`, usar `LockService`.
+3. Crear `src/features/fichas/infrastructure/googleSheetsRepository.ts` con la implementación que implementa la interface `FichaRepository`.
+4. Cambiar el factory en `src/lib/config/repository.ts` para devolver la nueva implementación cuando `process.env.FICHA_REPOSITORY === 'sheets'`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+La UI, los casos de uso, los schemas y los normalizadores **no cambian**.
+
+## Reglas innegociables (resumen del PDF)
+
+- TS estricto. Sin `any`. Sin `// @ts-ignore`.
+- Un único schema Zod compartido. Las reglas de validación viven ahí.
+- La UI **no** conoce filas, columnas ni IDs de Sheets.
+- Importes sin `$`, teléfonos y documentos como `string`, graduaciones conservan el signo.
+- Toda llamada async contempla `loading`, `empty`, `success`, `error`.
+- Idioma de la UI: español rioplatense.
+- Idioma del código: inglés.
+
+## Próximas features sugeridas
+
+Ver `odd/sessions/2026-09-29.md` §"Próximas features" para el detalle y el orden recomendado.
+
+1. **Commits** de la working tree actual (está sucia salvo el scaffold inicial).
+2. **Google Sheets real** detrás de `FichaRepository`.
+3. **Auth con Google + allowlist**.
+4. **OCR/IA** con `FichaExtractor` (Fase 5 del PDF).
+5. **Tests de componentes UI** con `@testing-library/react`.
+6. **Reportes** (la card del sidebar está deshabilitada).
+7. **Atajos de teclado y Cmd+K**.
+
+## Decisiones de la sesión
+
+Ver `odd/decisions/optica-app-v1.md` (12 decisiones: persistencia mock, stack UI, validación Zod, atomicidad de NRO_FICHA, búsqueda, layout de ficha réplica papel, scope de tests, criterio de commits, shell con sidebar+topbar, KPIs en listado, formateador de fechas numérico, fechas inválidas silenciosas).
