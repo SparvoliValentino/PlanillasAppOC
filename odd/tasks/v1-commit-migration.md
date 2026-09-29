@@ -2,9 +2,10 @@
 
 **Feature**: v1-commit-migration
 **Inicio**: 2026-09-29
-**Estado**: 🟡 En curso
-**Stack**: el mismo de `optica-app-v1` (no se toca código, solo git).
-**Motivación**: la sesión del 2026-09-29 dejó toda la V1 en la working tree sin commitear (salvo el scaffold inicial `c9a8705`). Esta mini-feature migra ese trabajo a commits por unidades de trabajo revisables, siguiendo el skill `gentle-ai-work-unit-commits`.
+**Cierre**: 2026-09-29
+**Estado**: ✅ Cerrada. 13 commits nuevos en `master`, repo verde.
+**Stack**: el mismo de `optica-app-v1` (no se tocó código, solo git).
+**Motivación**: la sesión del 2026-09-29 dejó toda la V1 en la working tree sin commitear (salvo el scaffold inicial `c9a8705`). Esta mini-feature migró ese trabajo a commits por unidades de trabajo revisables, siguiendo el skill `gentle-ai-work-unit-commits`.
 
 ---
 
@@ -106,13 +107,34 @@
 
 ---
 
-## Estado final esperado
+## Estado final observado
 
-- 13 commits nuevos en `master`.
-- `git log --oneline` muestra una historia limpia y revisable de la V1.
-- Cada commit deja el repo compilando (cuando corresponde) o solo agrega piezas sin romper nada.
-- `npm run test`, `npm run typecheck`, `npm run lint`, `npm run build` siguen verdes al final.
-- Working tree limpia: `git status` solo reporta archivos ignorados (`.data/`, `.next/`, etc.).
+- **13 commits nuevos** en `master` (más `c9a8705` del scaffold inicial → 14 totales).
+- Historia limpia: deps → domain → repository → application → http → api → paper primitives → date input → sections+ficha → shell → pages → docs odd → readme.
+- **80/80 tests passing** (39 domain + 17 infra + 11 use cases + 12 date input + 1 smoke heredado).
+- **`npm run typecheck` verde**.
+- **`npm run lint` verde**.
+- **`npm run build` verde** (las 4 rutas estáticas y las 3 dinámicas se compilaron sin warnings).
+- Working tree limpia: solo queda `apps-script/optica-backend.md` como untracked (es del usuario, no parte de la V1 commiteable).
+
+### Hashes resultantes
+
+```
+9f1f471 docs(readme): replace scaffold README with project documentation
+add34f6 docs(odd): add optica-app-v1 task tracking, decisions, session log, and reference images
+c4c4c93 feat(pages): add home, fichas listing, new, and detail pages
+9f7789b feat(ui): add app shell with sidebar and topbar
+448ce0c feat(ui): add ficha sections and replica read/edit views
+cfb4a56 feat(ui): add date input with progressive auto-format
+61c8399 feat(ui): add paper primitives for ficha replica layout
+acd415f feat(api): add fichas CRUD endpoints
+916b684 feat(http): add response helpers and repository factory
+5446fb1 feat(application): add fichas CRUD use cases
+0aefd2f feat(repository): add mock FichaRepository with atomic NRO_FICHA
+bc5faee feat(domain): add ficha domain model with validation and normalization
+372c248 chore(deps): add zod as direct dependency and refresh lockfile
+c9a8705 chore: initial scaffold for optica app v1
+```
 
 ---
 
