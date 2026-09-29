@@ -1,0 +1,39 @@
+# Local Pi runtime state
+.atl/
+
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Production builds
+build/
+dist/
+
+# Environment files (never commit real secrets)
+.env*.local
+.env
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor settings
+.vscode/
+.idea/
+
+# Vim swap files
+*.swp
+*.swo
+
+# Local app data (mock repository persistence)
+.data/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
