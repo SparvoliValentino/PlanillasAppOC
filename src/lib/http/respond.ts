@@ -11,11 +11,17 @@ import { ZodError } from "zod";
 
 import {
   AppError,
+  ConflictError,
   NotFoundError,
   StorageError,
   ValidationError,
 } from "./errors";
-import { RepositoryNotFoundError, RepositoryStorageError } from "@/features/fichas/infrastructure/mockFichaRepository";
+import {
+  RepositoryConflictError,
+  RepositoryNotFoundError,
+  RepositoryStorageError,
+  RepositoryValidationError,
+} from "@/features/fichas/domain/errors";
 
 interface ErrorBody {
   error: string;
@@ -60,6 +66,22 @@ export function errorResponse(error: unknown): NextResponse<ErrorBody> {
     return NextResponse.json(
       { error: notFound.code, message: notFound.message },
       { status: notFound.status },
+    );
+  }
+
+  if (error instanceof RepositoryConflictError) {
+    const conflict = new ConflictError(error.message);
+    return NextResponse.json(
+      { error: conflict.code, message: conflict.message },
+      { status: conflict.status },
+    );
+  }
+
+  if (error instanceof RepositoryValidationError) {
+    const validation = new ValidationError(error.issues);
+    return NextResponse.json(
+      { error: validation.code, message: validation.message, details: validation.issues },
+      { status: validation.status },
     );
   }
 

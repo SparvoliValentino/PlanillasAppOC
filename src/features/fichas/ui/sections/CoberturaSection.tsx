@@ -1,11 +1,11 @@
 "use client";
 
-import type { Cobertura, Ficha } from "../../domain/ficha.types";
+import type { Cobertura, CreateFichaInput, Ficha } from "../../domain/ficha.types";
 
 import { PaperField } from "../paper/PaperField";
 
 interface CoberturaSectionProps {
-  value: Ficha;
+  value: CreateFichaInput;
   onChange?: (next: Partial<Ficha>) => void;
 }
 

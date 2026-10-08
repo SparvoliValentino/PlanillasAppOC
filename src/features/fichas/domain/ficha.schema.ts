@@ -18,6 +18,8 @@ import {
   parseImporte,
   parseTelefono,
 } from "./normalizers";
+import { FICHA_SORT_FIELDS, SORT_DIRECTIONS } from "./ficha.types";
+import type { FichaSortField, ListFichasParams, SortDirection } from "./ficha.types";
 
 // ---------------------------------------------------------------------------
 // Primitives
@@ -178,8 +180,17 @@ const ojoLadoSchema = z
 // Public schemas
 // ---------------------------------------------------------------------------
 
+const nroFichaSchema = z
+  .number({
+    required_error: "El N° de ficha es obligatorio.",
+    invalid_type_error: "El N° de ficha debe ser un número.",
+  })
+  .int("El N° de ficha debe ser un entero positivo.")
+  .positive("El N° de ficha debe ser un entero positivo.")
+  .max(99999999, "El N° de ficha es demasiado largo.");
+
 export const FichaSchema = z.object({
-  nroFicha: z.number().int().positive(),
+  nroFicha: nroFichaSchema,
   nombre: defaultString,
   edad: defaultString,
   domicilio: defaultString,
@@ -196,22 +207,83 @@ export const FichaSchema = z.object({
   cobertura: coberturaSchema,
 });
 
-export const CreateFichaSchema = FichaSchema.omit({ nroFicha: true });
+// `nroFicha` is typed by the user at creation (it links the digital ficha to
+// a physical card) and is immutable afterwards, so patches never carry it.
+export const CreateFichaSchema = FichaSchema;
 
-export const UpdateFichaSchema = CreateFichaSchema.partial();
+export const UpdateFichaSchema = FichaSchema.omit({ nroFicha: true }).partial();
+
+// Stored records also carry the repository-managed audit timestamps. Legacy
+// records without them load with "".
+export const FichaRecordSchema = FichaSchema.extend({
+  createdAt: z.string().default(""),
+  updatedAt: z.string().default(""),
+  anuladaAt: z.string().default(""),
+});
+
+// PUT body: the patch plus the `updatedAt` the client loaded (optimistic
+// concurrency). Timestamps inside `patch` are stripped by Zod.
+export const UpdateFichaRequestSchema = z.object({
+  patch: UpdateFichaSchema,
+  expectedUpdatedAt: z.string().min(1).optional(),
+});
 
 export const FichaSummarySchema = z.object({
   nroFicha: z.number().int().positive(),
   nombre: z.string(),
   fechaEntrada: z.string(),
   telefono: z.string(),
+  fechaCarga: z.string(),
+  anuladaAt: z.string().default(""),
 });
 
-export const ListFichasParamsSchema = z.object({
-  page: z.number().int().positive().default(1),
-  pageSize: z.number().int().positive().max(200).default(50),
-  q: z.string().default(""),
+// POST /anular body: the `updatedAt` the client loaded (optimistic concurrency).
+export const AnularFichaRequestSchema = z.object({
+  expectedUpdatedAt: z.string().min(1).optional(),
 });
+
+/** Minimum digits for a phone search (same rule as the Apps Script). */
+export const MIN_PHONE_SEARCH_DIGITS = 3;
+
+/**
+ * List params. `sortDir` defaults per field (dates desc, nombre/nroFicha
+ * asc) so repositories always receive a concrete value. `telefono` is
+ * reduced to digits; typing something with fewer than 3 digits is invalid.
+ */
+export const ListFichasParamsSchema = z
+  .object({
+    page: z.number().int().min(1).default(1),
+    pageSize: z.number().int().min(1).max(200).default(50),
+    q: z.string().default(""),
+    nombre: z.string().default(""),
+    telefono: z.string().default(""),
+    incluirAnuladas: z.boolean().default(false),
+    sortBy: z.enum(FICHA_SORT_FIELDS as [FichaSortField, ...FichaSortField[]]).default("fechaCarga"),
+    sortDir: z.enum(SORT_DIRECTIONS as [SortDirection, ...SortDirection[]]).optional(),
+  })
+  .transform((value, ctx): ListFichasParams => {
+    const digits = value.telefono.replace(/\D/g, "");
+    if (value.telefono.trim() !== "" && digits.length < MIN_PHONE_SEARCH_DIGITS) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["telefono"],
+        message: `Ingresá al menos ${MIN_PHONE_SEARCH_DIGITS} dígitos.`,
+      });
+      return z.NEVER;
+    }
+    const defaultDir: SortDirection =
+      value.sortBy === "fechaCarga" || value.sortBy === "fechaEntrada" ? "desc" : "asc";
+    return {
+      page: value.page,
+      pageSize: value.pageSize,
+      q: value.q.trim(),
+      nombre: value.nombre.trim(),
+      telefono: digits,
+      incluirAnuladas: value.incluirAnuladas,
+      sortBy: value.sortBy,
+      sortDir: value.sortDir ?? defaultDir,
+    };
+  });
 
 export const PaginatedSchema = <T extends z.ZodTypeAny>(item: T) =>
   z.object({
@@ -219,6 +291,7 @@ export const PaginatedSchema = <T extends z.ZodTypeAny>(item: T) =>
     total: z.number().int().nonnegative(),
     page: z.number().int().positive(),
     pageSize: z.number().int().positive(),
+    totalPages: z.number().int().min(1),
   });
 
 // ---------------------------------------------------------------------------
@@ -227,3 +300,10 @@ export const PaginatedSchema = <T extends z.ZodTypeAny>(item: T) =>
 
 export type FichaInput = z.infer<typeof CreateFichaSchema>;
 export type FichaPatch = z.infer<typeof UpdateFichaSchema>;
+export type FichaRecord = z.infer<typeof FichaRecordSchema>;
+
+/** Validates the `list` payload returned by a storage backend. */
+export const ListFichasResultSchema = PaginatedSchema(FichaSummarySchema).extend({
+  sortBy: z.enum(FICHA_SORT_FIELDS as [FichaSortField, ...FichaSortField[]]),
+  sortDir: z.enum(SORT_DIRECTIONS as [SortDirection, ...SortDirection[]]),
+});

@@ -6,8 +6,10 @@
  * future Apps Script adapter MUST respect: changing the order here is a
  * schema migration and must be coordinated.
  *
- * The list below matches the PDF exactly. New columns are added through
- * a controlled migration; field removal is forbidden in V1.
+ * The first 54 columns match the PDF exactly, followed by the three audit
+ * columns. It mirrors the `FIELDS` table in `apps-script/optica-backend.md`.
+ * New columns are added through a controlled migration; field removal is
+ * forbidden in V1.
  */
 
 export const FICHA_COLUMN_ORDER: readonly string[] = [
@@ -73,6 +75,13 @@ export const FICHA_COLUMN_ORDER: readonly string[] = [
   "NRO_CARNET",
   "NRO_DOC",
   "FORMA_PAGO",
+  // Audit (managed by the Apps Script backend; see
+  // odd/decisions/optica-sheets-backend.md §2)
+  "CREATED_AT",
+  "UPDATED_AT",
+  // Soft delete marker (ISO timestamp, empty = active). Added after the
+  // original 56 columns; the Apps Script adds the header on existing sheets.
+  "ANULADA_AT",
 ] as const;
 
 /**

@@ -1,11 +1,11 @@
 "use client";
 
-import type { Ficha } from "../../domain/ficha.types";
+import type { CreateFichaInput, Ficha } from "../../domain/ficha.types";
 
 import { PaperCheckbox } from "../paper/PaperCheckbox";
 
 interface TipoLenteSectionProps {
-  value: Ficha;
+  value: CreateFichaInput;
   onChange?: (next: Partial<Ficha>) => void;
 }
 

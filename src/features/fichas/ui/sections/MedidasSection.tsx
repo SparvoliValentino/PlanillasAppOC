@@ -1,11 +1,11 @@
 "use client";
 
-import type { Ficha, Medidas } from "../../domain/ficha.types";
+import type { CreateFichaInput, Ficha, Medidas } from "../../domain/ficha.types";
 
 import { PaperField } from "../paper/PaperField";
 
 interface MedidasSectionProps {
-  value: Ficha;
+  value: CreateFichaInput;
   onChange?: (next: Partial<Ficha>) => void;
 }
 

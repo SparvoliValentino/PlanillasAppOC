@@ -1,12 +1,12 @@
 "use client";
 
-import type { Ficha } from "../../domain/ficha.types";
+import type { CreateFichaInput, Ficha } from "../../domain/ficha.types";
 
 import { PaperDateField } from "../paper/PaperDateField";
 import { PaperField } from "../paper/PaperField";
 
 interface IdentificacionSectionProps {
-  value: Ficha;
+  value: CreateFichaInput;
   onChange?: (next: Partial<Ficha>) => void;
 }
 

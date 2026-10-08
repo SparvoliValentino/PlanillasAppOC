@@ -30,6 +30,18 @@ export const TIPO_LENTE_VALUES: readonly TipoLente[] = ["", "BIFOCAL", "PROGRESI
 export const MATERIAL_LENTE_VALUES: readonly MaterialLente[] = ["", "MINERAL", "ORGANICO"] as const;
 export const ORIGEN_LENTE_VALUES: readonly OrigenLente[] = ["", "STOCK", "LABORATORIO"] as const;
 
+export type FichaSortField = "fechaCarga" | "fechaEntrada" | "nombre" | "nroFicha";
+
+export type SortDirection = "asc" | "desc";
+
+export const FICHA_SORT_FIELDS: readonly FichaSortField[] = [
+  "fechaCarga",
+  "fechaEntrada",
+  "nombre",
+  "nroFicha",
+] as const;
+export const SORT_DIRECTIONS: readonly SortDirection[] = ["asc", "desc"] as const;
+
 // ---------------------------------------------------------------------------
 // Grouped shapes
 // ---------------------------------------------------------------------------
@@ -85,6 +97,12 @@ export interface Cobertura {
 
 export interface Ficha {
   nroFicha: number;
+  /** ISO 8601 upload timestamp. Repository-managed; "" for legacy records. */
+  createdAt: string;
+  /** ISO 8601 last-modification timestamp. Repository-managed; "" for legacy records. */
+  updatedAt: string;
+  /** ISO 8601 void timestamp ("anulada"). "" while the ficha is active. */
+  anuladaAt: string;
   nombre: string;
   edad: string;
   domicilio: string;
@@ -114,20 +132,61 @@ export interface FichaSummary {
   nombre: string;
   fechaEntrada: string;
   telefono: string;
+  /** Upload timestamp (ISO 8601); same value as `Ficha.createdAt`. */
+  fechaCarga: string;
+  /** Void timestamp (ISO 8601); "" while the ficha is active. */
+  anuladaAt: string;
 }
 
 // ---------------------------------------------------------------------------
 // Use case inputs / outputs
 // ---------------------------------------------------------------------------
 
-export type CreateFichaInput = Omit<Ficha, "nroFicha">;
+/**
+ * A rendered ficha PDF. `content` holds raw bytes (not base64) so the HTTP
+ * layer can stream them as-is and no adapter detail (base64) leaks upward.
+ */
+export interface FichaPdf {
+  fileName: string;
+  mimeType: string;
+  content: Uint8Array;
+}
 
-export type UpdateFichaInput = Partial<Omit<Ficha, "nroFicha">>;
+/** Audit timestamps are managed only by the repository, never by clients. */
+export type CreateFichaInput = Omit<Ficha, "createdAt" | "updatedAt" | "anuladaAt">;
 
+export type UpdateFichaInput = Partial<Omit<Ficha, "nroFicha" | "createdAt" | "updatedAt" | "anuladaAt">>;
+
+export interface AnularFichaOptions {
+  /** Optimistic concurrency token: the `updatedAt` the client loaded. */
+  expectedUpdatedAt?: string;
+}
+
+export interface UpdateFichaOptions {
+  /**
+   * Optimistic concurrency token: the `updatedAt` the client loaded. When it
+   * differs from the stored one the update is rejected with a conflict.
+   */
+  expectedUpdatedAt?: string;
+}
+
+/**
+ * Fully resolved list parameters (what repositories receive). `sortDir` is
+ * always concrete: use cases resolve the per-field default.
+ */
 export interface ListFichasParams {
   page: number;
   pageSize: number;
+  /** Free search: exact N° ficha, name tokens, or phone/document digits. */
   q: string;
+  /** Name tokens; every token must be contained (accent/case-insensitive). */
+  nombre: string;
+  /** Digits only; matched against `tel` or `cel`. Empty means no filter. */
+  telefono: string;
+  /** Include voided fichas. Defaults to false: they are hidden. */
+  incluirAnuladas: boolean;
+  sortBy: FichaSortField;
+  sortDir: SortDirection;
 }
 
 export interface Paginated<T> {
@@ -135,6 +194,13 @@ export interface Paginated<T> {
   total: number;
   page: number;
   pageSize: number;
+  /** At least 1, even when there are no items. */
+  totalPages: number;
+}
+
+export interface ListFichasResult extends Paginated<FichaSummary> {
+  sortBy: FichaSortField;
+  sortDir: SortDirection;
 }
 
 // ---------------------------------------------------------------------------
@@ -155,10 +221,10 @@ export function pickPrimaryPhone(ficha: Pick<Ficha, "cel" | "tel">): string {
 }
 
 /**
- * Builds the empty-string defaults for a new Ficha. The repository is still
- * responsible for assigning `nroFicha`.
+ * Builds the empty-string defaults for a new Ficha. `nroFicha` is not
+ * included: the user types it manually at creation.
  */
-export function emptyFichaValues(): Omit<Ficha, "nroFicha"> {
+export function emptyFichaValues(): Omit<CreateFichaInput, "nroFicha"> {
   const emptyOjo: OjoGraduacion = { esf: "", cil: "", eje: "" };
   const emptyArmazon: OjoArmazon = {
     material: "",

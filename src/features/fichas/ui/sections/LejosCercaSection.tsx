@@ -1,12 +1,12 @@
 "use client";
 
-import type { Ficha } from "../../domain/ficha.types";
+import type { CreateFichaInput, Ficha } from "../../domain/ficha.types";
 
 import { OjoArmazonBlock, OjoGraduacionBlock } from "./GraduacionBlock";
 
 interface LejosCercaSectionProps {
   kind: "lejos" | "cerca";
-  value: Ficha;
+  value: CreateFichaInput;
   onChange?: (next: Partial<Ficha>) => void;
 }
 

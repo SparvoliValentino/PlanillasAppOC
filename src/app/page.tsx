@@ -43,13 +43,13 @@ export default function HomePage() {
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-col gap-8">
       <header className="flex flex-col gap-2">
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
           Bienvenido
         </p>
-        <h1 className="text-4xl font-semibold tracking-tight">Optica App</h1>
-        <p className="max-w-2xl text-base text-muted-foreground">
+        <h1 className="text-5xl font-semibold tracking-tight">Optica App</h1>
+        <p className="max-w-3xl text-lg text-muted-foreground">
           Sistema interno para digitalizar y gestionar las fichas de pacientes
-          de la óptica. Esta es la base de la versión 1 (mock local).
+          de la óptica. Los datos se guardan en Google Sheets.
         </p>
       </header>
 
@@ -58,34 +58,34 @@ export default function HomePage() {
           const Icon = card.icon;
           const inner = (
             <>
-              <div className="flex size-10 items-center justify-center rounded-md bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300">
-                <Icon className="size-5" />
+              <div className="flex size-12 items-center justify-center rounded-md bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300">
+                <Icon className="size-6" />
               </div>
-              <h2 className="text-base font-semibold tracking-tight">{card.title}</h2>
+              <h2 className="text-xl font-semibold tracking-tight">{card.title}</h2>
               <p
                 className={
                   card.disabled
-                    ? "text-sm text-muted-foreground/60"
-                    : "text-sm text-muted-foreground"
+                    ? "text-base text-muted-foreground/60"
+                    : "text-base text-muted-foreground"
                 }
               >
                 {card.description}
               </p>
               {!card.disabled && (
-                <span className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-teal-700 dark:text-teal-300">
+                <span className="mt-auto inline-flex items-center gap-1 text-base font-medium text-teal-700 dark:text-teal-300">
                   Ir
-                  <ArrowRight className="size-3.5" />
+                  <ArrowRight className="size-4" />
                 </span>
               )}
               {card.disabled && (
-                <span className="mt-auto inline-flex w-fit items-center gap-1 rounded bg-zinc-100 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                <span className="mt-auto inline-flex w-fit items-center gap-1 rounded bg-zinc-100 px-2 py-0.5 text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
                   Próximamente
                 </span>
               )}
             </>
           );
           const className =
-            "group flex h-full flex-col items-start gap-2 rounded-lg border border-border bg-card p-5 shadow-sm transition-all" +
+            "group flex h-full flex-col items-start gap-2 rounded-lg border border-border bg-card p-6 shadow-sm transition-all" +
             (card.disabled
               ? " cursor-not-allowed opacity-60"
               : " hover:-translate-y-0.5 hover:border-teal-300 hover:shadow-md dark:hover:border-teal-700");

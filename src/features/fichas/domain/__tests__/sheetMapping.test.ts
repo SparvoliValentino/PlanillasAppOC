@@ -12,6 +12,13 @@ describe("sheetMapping", () => {
     }
   });
 
+  it("keeps the 54 Anexo B columns followed by the two audit columns", () => {
+    expect(FICHA_COLUMN_ORDER).toHaveLength(57);
+    expect(FICHA_COLUMN_ORDER[0]).toBe("NRO_FICHA");
+    expect(FICHA_COLUMN_ORDER[53]).toBe("FORMA_PAGO");
+    expect(FICHA_COLUMN_ORDER.slice(-3)).toEqual(["CREATED_AT", "UPDATED_AT", "ANULADA_AT"]);
+  });
+
   it("has no duplicate columns", () => {
     const seen = new Set<string>();
     for (const col of FICHA_COLUMN_ORDER) {

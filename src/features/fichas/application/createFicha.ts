@@ -6,8 +6,8 @@ import { CreateFichaSchema } from "../domain/ficha.schema";
  * Use case: create a new ficha.
  *
  * Validates the input against the shared Zod schema (so normalizers run
- * before persistence) and delegates to the repository, which assigns the
- * sequential `NRO_FICHA` atomically.
+ * before persistence) and delegates to the repository. `nroFicha` is required
+ * (typed by the user); the repository rejects duplicates with a conflict.
  */
 export async function createFicha(
   repo: FichaRepository,

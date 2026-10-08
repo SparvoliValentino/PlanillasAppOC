@@ -28,14 +28,15 @@ export async function GET(_request: Request, context: RouteContext): Promise<Res
 /**
  * PUT /api/fichas/:numero
  *
- * Body: `UpdateFichaInput` (partial ficha). Validates, persists via the
- * repository (deep merge), and returns the merged ficha.
+ * Body: `{ patch: UpdateFichaInput, expectedUpdatedAt?: string }`. Validates,
+ * persists via the repository (deep merge) and returns the merged ficha.
+ * 409 when `expectedUpdatedAt` no longer matches the stored `updatedAt`.
  */
 export async function PUT(request: Request, context: RouteContext): Promise<Response> {
   try {
     const { numero } = await context.params;
-    const patch = await readJsonBody<unknown>(request);
-    const ficha = await updateFicha(getFichaRepository(), Number(numero), patch);
+    const body = await readJsonBody<unknown>(request);
+    const ficha = await updateFicha(getFichaRepository(), Number(numero), body);
     return ok(ficha);
   } catch (error) {
     return errorResponse(error);

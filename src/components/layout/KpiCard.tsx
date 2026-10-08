@@ -19,21 +19,21 @@ const ACCENT_CLASSES: Record<NonNullable<KpiCardProps["accent"]>, string> = {
 
 export function KpiCard({ label, value, hint, icon: Icon, accent = "teal" }: KpiCardProps) {
   return (
-    <div className="flex items-center gap-4 rounded-lg border border-border bg-card px-4 py-3 shadow-sm">
+    <div className="flex items-center gap-4 rounded-lg border border-border bg-card px-5 py-4 shadow-sm">
       <div
         className={cn(
-          "flex size-10 shrink-0 items-center justify-center rounded-md",
+          "flex size-12 shrink-0 items-center justify-center rounded-md",
           ACCENT_CLASSES[accent],
         )}
       >
-        <Icon className="size-5" />
+        <Icon className="size-6" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </p>
-        <p className="truncate text-2xl font-semibold leading-tight">{value}</p>
-        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+        <p className="truncate text-3xl font-semibold leading-tight">{value}</p>
+        {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 
-import type { Ficha } from "../domain/ficha.types";
+import type { CreateFichaInput } from "../domain/ficha.types";
 
 import {
   PaperBody,
@@ -11,6 +11,7 @@ import {
   PaperHeader,
 } from "./paper/PaperLayout";
 import { PaperLabel } from "./paper/PaperField";
+import { Input } from "@/components/ui/input";
 import { CoberturaSection } from "./sections/CoberturaSection";
 import { EconomicoSection } from "./sections/EconomicoSection";
 import { IdentificacionSection } from "./sections/IdentificacionSection";
@@ -19,19 +20,26 @@ import { MedidasSection } from "./sections/MedidasSection";
 import { RecetaSection } from "./sections/RecetaSection";
 import { TipoLenteSection } from "./sections/TipoLenteSection";
 
-interface FichaFormProps {
-  value: Ficha;
-  onChange: (next: Ficha) => void;
+interface FichaFormProps<T extends CreateFichaInput> {
+  value: T;
+  onChange: (next: T) => void;
+  /** When true the N° de ficha is a typed input (creation); otherwise read-only. */
+  nroFichaEditable?: boolean;
 }
 
 /**
  * Edit-mode literal replica of the physical optica card. Same layout as
- * `FichaCard`; `nroFicha` is read-only and rendered prominently.
+ * `FichaCard`; `nroFicha` is rendered prominently and is only editable when
+ * `nroFichaEditable` is set (creation), since it is immutable afterwards.
  */
-export function FichaForm({ value, onChange }: FichaFormProps) {
+export function FichaForm<T extends CreateFichaInput>({
+  value,
+  onChange,
+  nroFichaEditable = false,
+}: FichaFormProps<T>) {
   const handleChange = useCallback(
-    (patch: Partial<Ficha>) => {
-      const next: Ficha = { ...value, ...patch };
+    (patch: Partial<CreateFichaInput>) => {
+      const next: T = { ...value, ...patch };
       if (patch.lejos) next.lejos = { ...value.lejos, ...patch.lejos };
       if (patch.cerca) next.cerca = { ...value.cerca, ...patch.cerca };
       if (patch.medidas) next.medidas = { ...value.medidas, ...patch.medidas };
@@ -52,9 +60,24 @@ export function FichaForm({ value, onChange }: FichaFormProps) {
               <PaperLabel className="text-xs">
                 {value.nroFicha === 0 ? "N°:" : "N° de ficha"}
               </PaperLabel>
-              <span className="font-mono text-5xl font-bold leading-none tracking-tight">
-                {value.nroFicha === 0 ? "—" : value.nroFicha}
-              </span>
+              {nroFichaEditable ? (
+                <Input
+                  value={value.nroFicha === 0 ? "" : String(value.nroFicha)}
+                  onChange={(event) => {
+                    const digits = event.target.value.replace(/\D/g, "");
+                    handleChange({ nroFicha: digits === "" ? 0 : Number(digits) });
+                  }}
+                  inputMode="numeric"
+                  aria-label="Número de ficha"
+                  placeholder="—"
+                  autoFocus
+                  className="h-14 w-44 rounded-none border-x-0 border-t-0 border-b border-dashed border-foreground/40 bg-transparent px-1 text-right font-mono text-5xl font-bold tracking-tight shadow-none focus-visible:border-solid focus-visible:border-foreground focus-visible:ring-0 md:text-5xl"
+                />
+              ) : (
+                <span className="font-mono text-5xl font-bold leading-none tracking-tight">
+                  {value.nroFicha === 0 ? "—" : value.nroFicha}
+                </span>
+              )}
             </div>
           }
         />

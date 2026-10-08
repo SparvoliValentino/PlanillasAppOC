@@ -1,11 +1,11 @@
 "use client";
 
-import type { Economico, Ficha } from "../../domain/ficha.types";
+import type { Economico, CreateFichaInput, Ficha } from "../../domain/ficha.types";
 
 import { PaperField } from "../paper/PaperField";
 
 interface EconomicoSectionProps {
-  value: Ficha;
+  value: CreateFichaInput;
   onChange?: (next: Partial<Ficha>) => void;
 }
 

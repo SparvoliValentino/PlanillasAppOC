@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
+import { apiFetch } from "@/lib/http/apiFetch";
 
-import type { Ficha } from "@/features/fichas/domain/ficha.types";
+import type { CreateFichaInput, Ficha } from "@/features/fichas/domain/ficha.types";
 import { emptyFichaValues } from "@/features/fichas/domain/ficha.types";
 import { FichaForm } from "@/features/fichas/ui/FichaForm";
 
@@ -23,24 +24,27 @@ interface ApiErrorResponse {
 
 export default function NuevaFichaPage() {
   const router = useRouter();
-  const [ficha, setFicha] = useState<Ficha>(() => ({
+  const [ficha, setFicha] = useState<CreateFichaInput>(() => ({
     nroFicha: 0,
     ...emptyFichaValues(),
   }));
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
+    if (!Number.isInteger(ficha.nroFicha) || ficha.nroFicha <= 0) {
+      toast.error("Ingresá el N° de ficha antes de guardar.");
+      return;
+    }
     setSaving(true);
     try {
-      const { nroFicha: _omit, ...payload } = ficha;
-      void _omit;
-      const response = await fetch("/api/fichas", {
+      const response = await apiFetch("/api/fichas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(ficha),
       });
       if (!response.ok) {
         const body = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+        // 409 (duplicate number): show the server message so the user can fix it.
         const description = body?.details
           ? body.details.map((d) => `${d.path}: ${d.message}`).join("\n")
           : body?.message ?? `Error ${response.status}`;
@@ -64,38 +68,38 @@ export default function NuevaFichaPage() {
         <button
           type="button"
           onClick={() => router.push("/fichas")}
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
+          className={buttonVariants({ variant: "ghost" })}
         >
-          <ChevronLeft className="mr-1 size-4" />
+          <ChevronLeft className="mr-1 size-5" />
           Volver al listado
         </button>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            size="sm"
             onClick={() => router.push("/fichas")}
             disabled={saving}
           >
             Cancelar
           </Button>
-          <Button onClick={handleSave} size="sm" disabled={saving}>
+          <Button onClick={handleSave} disabled={saving} aria-busy={saving}>
+            {saving && <Loader2 className="animate-spin" aria-hidden />}
             {saving ? "Guardando…" : "Guardar ficha"}
           </Button>
         </div>
       </div>
 
       <header className="flex flex-col gap-1">
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
           Nueva
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight">Cargar una ficha nueva</h1>
-        <p className="text-sm text-muted-foreground">
-          Completá los datos. El número de ficha se asigna al guardar.
+        <h1 className="text-3xl font-semibold tracking-tight">Cargar una ficha nueva</h1>
+        <p className="text-base text-muted-foreground">
+          Ingresá el número de la ficha física y completá los datos. El número no se puede cambiar después.
         </p>
       </header>
 
       <div className="rounded-lg bg-card p-4 shadow-sm md:p-6">
-        <FichaForm value={ficha} onChange={setFicha} />
+        <FichaForm value={ficha} onChange={setFicha} nroFichaEditable />
       </div>
     </section>
   );
