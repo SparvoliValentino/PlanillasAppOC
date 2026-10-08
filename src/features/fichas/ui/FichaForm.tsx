@@ -16,7 +16,7 @@ import { CoberturaSection } from "./sections/CoberturaSection";
 import { EconomicoSection } from "./sections/EconomicoSection";
 import { IdentificacionSection } from "./sections/IdentificacionSection";
 import { LejosCercaSection } from "./sections/LejosCercaSection";
-import { MedidasSection } from "./sections/MedidasSection";
+import { MEDIDAS_COLUMN_WIDTH, MedidasSection } from "./sections/MedidasSection";
 import { RecetaSection } from "./sections/RecetaSection";
 import { TipoLenteSection } from "./sections/TipoLenteSection";
 
@@ -85,6 +85,7 @@ export function FichaForm<T extends CreateFichaInput>({
 
       <PaperFace>
         <PaperBody
+          rightWidthClass={MEDIDAS_COLUMN_WIDTH}
           left={
             <div className="flex flex-col gap-4">
               <RecetaSection value={value} onChange={handleChange} />

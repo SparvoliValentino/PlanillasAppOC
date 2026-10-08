@@ -15,6 +15,13 @@ interface RowDef {
   label: string;
 }
 
+/**
+ * Width of the PaperBody column that hosts this section. Measurements are a
+ * few characters each, so the column stays narrow and leaves room for the
+ * prescription block on the left.
+ */
+export const MEDIDAS_COLUMN_WIDTH = "w-full md:w-80 md:shrink-0";
+
 const ROWS: RowDef[] = [
   { od: "dilOd", oi: "dilOi", label: "D.I.L." },
   { od: "dicOd", oi: "dicOi", label: "D.I.C." },
@@ -42,7 +49,7 @@ export function MedidasSection({ value, onChange }: MedidasSectionProps) {
       {ROWS.map(({ od, oi, label }) => (
         <div
           key={od}
-          className="grid grid-cols-[5.5rem_3rem_1fr_3rem_1fr] items-baseline gap-x-2 text-sm"
+          className="grid grid-cols-[4.5rem_2rem_minmax(0,1fr)_2rem_minmax(0,1fr)] items-baseline gap-x-2 text-sm"
         >
           <span className="italic text-foreground/80">{label}</span>
           <span className="text-right italic text-foreground/60">O.D.</span>
