@@ -60,7 +60,6 @@ export function OjoGraduacionBlock({ label, value, onChange }: OjoGraduacionBloc
               inputMode: "numeric",
             }
           : {})}
-        className="col-span-2"
         mono
       />
     </div>
