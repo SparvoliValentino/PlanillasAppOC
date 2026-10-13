@@ -2,7 +2,7 @@
 
 **Feature**: paper-resizable-layout
 **Start**: 2026-10-13
-**Status**: 🟡 In progress
+**Status**: 🟡 Implemented, pending browser check by the user
 **Branch**: `feat/paper-resizable-layout` (branched from `main` at `a82a4bf`)
 **TDD**: off (source: previous feature documents of this project). Functional checks: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`. Runner: Vitest 3, no DOM environment, so only pure logic is unit tested.
 **Commits**: one work-unit commit per task on the feature branch, Conventional Commits, no AI attribution. Push, PR and merge are the user's decision.
@@ -48,26 +48,37 @@ The ficha is a literal replica of the paper card with fixed proportions (`md:w-8
 
 ## Tasks
 
-### T1 — Layout core: pure resize logic and persisted store ⬜
+### T1 — Layout core: pure resize logic and persisted store ✅ done
 **Route**: delegated writer (2+ non-trivial files; the grid mapping prepares the write).
 - Pure functions: move a boundary between two adjacent tracks with clamping to minimums, normalize tracks, serialize and parse the stored layout with validation and fallback.
 - Store on `localStorage` exposed through `useSyncExternalStore`, versioned key, default on the server and on first render.
 - Unit tests for the pure logic.
-**Checks**: typecheck, lint, test.
+**Checks**: typecheck ✅ lint ✅ tests ✅ (199, +21) build ✅.
+**Evidence**: commit `b467578`. `src/features/fichas/ui/layout/{tracks,storage,store}.ts` with tests. Storage key `optica.ficha.layout.v1`. ~530 lines with tests, above the heuristic: pure logic plus its tests form one coherent unit.
+**Review tier**: medium, deferred to slice.
 
-### T2 — Resizable primitives and main separators ⬜
+### T2 — Resizable primitives and main separators ✅ done
 **Route**: same delegated writer.
 - Handle component (pointer and keyboard) and a resizable grid primitive driven by the store.
 - `PaperBody` uses it for both body blocks (receta/medidas and económico/cobertura).
 - Reset control in the ficha.
-**Checks**: typecheck, lint, test, build.
+**Checks**: typecheck ✅ lint ✅ tests ✅ (199) build ✅.
+**Evidence**: commit `f1a5779`. `paper/ResizeHandle.tsx`, `paper/ResizableGrid.tsx`, `paper/ResetLayoutButton.tsx`; `PaperBody` takes a `grid` instead of `rightWidthClass`. Grids `body-receta` (0.7/0.3) and `body-economico` (0.6/0.4).
+**Review tier**: medium, deferred to slice.
 
-### T3 — Internal column boundaries of every block ⬜
+### T3 — Internal column boundaries of every block ✅ done
 **Route**: same delegated writer.
 - Medidas rows, graduation rows, armazón block, receta, identificación and any other multi-column grid in `src/features/fichas/ui/sections`.
 - Rows of the same grid share tracks.
-**Checks**: typecheck, lint, test, build.
+**Checks**: typecheck ✅ lint ✅ tests ✅ (208) build ✅.
+**Evidence**: commit `7ba272b`. Grids `medidas`, `graduacion`, `armazon`, `receta`, `identificacion`, `contacto`, defined in `layout/grids.ts`. Económico, Cobertura and TipoLente have no multi-column grids.
+**Review tier**: medium, deferred to slice.
 
 ## Progress and next step
 
-- 2026-10-13: feature document created, branch created. Next: T1.
+- 2026-10-13: feature document created, branch created.
+- 2026-10-13: T1–T3 done by one delegated writer. 19 files, +951 −144 (about 40% tests). Orchestrator spot check re-ran typecheck, lint and tests: green, 208 tests.
+- **Slice review**: `gentle-ai review assess` over `aa580c4..7ba272b` returned `medium`. Receipt-driven development is off (default), so no native review ran; writer self-verification is the check of record.
+- **Not verified**: nothing was checked in a browser. Pending: drag and touch behaviour, whether the default proportions match the previous look (the old layout used a fixed 320px medidas column and a content-sized right column; 0.7/0.3 and 0.6/0.4 approximate them), handles overlapping inputs, minimums at extreme widths.
+- **Open choice for the user**: only the main separators and the first row of each grid are Tab stops; handles on repeated rows use `tabIndex=-1` to avoid dozens of extra stops while filling the form.
+- **Next step**: user checks in the browser; tune defaults and minimums in `src/features/fichas/ui/layout/grids.ts` if needed. Push, PR and merge are the user's decision.
