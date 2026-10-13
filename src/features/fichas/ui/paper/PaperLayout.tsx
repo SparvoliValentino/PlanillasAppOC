@@ -2,6 +2,9 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
+import type { GridDef } from "../layout/storage";
+import { ResizableGrid } from "./ResizableGrid";
+
 /**
  * Layout helpers that turn the ficha into a literal table-like document.
  * The whole card is a bordered grid with two columns on the body and one
@@ -31,27 +34,27 @@ export function PaperFace({ children, className }: { children: ReactNode; classN
 
 /**
  * Two-column body block (left/right with a vertical separator in the
- * middle). The right column gets a fixed-ish width on desktop so the
- * medidas / tipo de lente stay compact, matching the paper layout.
+ * middle). On desktop the separator is draggable; the widths come from the
+ * persisted layout of `grid`. Below `md` the columns stack.
  */
 export function PaperBody({
   left,
   right,
-  rightWidthClass = "w-[280px]",
+  grid,
   className,
 }: {
   left: ReactNode;
   right: ReactNode;
-  rightWidthClass?: string;
+  grid: GridDef;
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col md:flex-row", className)}>
-      <div className="flex-1 border-b border-foreground/40 p-4 md:border-b-0 md:border-r">
+    <ResizableGrid grid={grid} tabStops className={className}>
+      <div className="min-w-0 border-b border-foreground/40 p-4 md:border-b-0 md:border-r">
         {left}
       </div>
-      <div className={cn("p-4 md:w-auto", rightWidthClass)}>{right}</div>
-    </div>
+      <div className="min-w-0 p-4">{right}</div>
+    </ResizableGrid>
   );
 }
 

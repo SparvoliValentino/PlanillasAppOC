@@ -7,11 +7,13 @@ import {
   PaperHeader,
 } from "./paper/PaperLayout";
 import { PaperLabel } from "./paper/PaperField";
+import { ResetLayoutButton } from "./paper/ResetLayoutButton";
+import { BODY_ECONOMICO_GRID, BODY_RECETA_GRID } from "./layout/grids";
 import { CoberturaSection } from "./sections/CoberturaSection";
 import { EconomicoSection } from "./sections/EconomicoSection";
 import { IdentificacionSection } from "./sections/IdentificacionSection";
 import { LejosCercaSection } from "./sections/LejosCercaSection";
-import { MEDIDAS_COLUMN_WIDTH, MedidasSection } from "./sections/MedidasSection";
+import { MedidasSection } from "./sections/MedidasSection";
 import { RecetaSection } from "./sections/RecetaSection";
 import { TipoLenteSection } from "./sections/TipoLenteSection";
 
@@ -24,54 +26,58 @@ interface FichaCardProps {
  */
 export function FichaCard({ ficha }: FichaCardProps) {
   return (
-    <PaperCard>
-      <PaperFace>
-        <PaperHeader
-          left={<IdentificacionSection value={ficha} />}
-          right={
-            <div className="flex flex-col items-end">
-              <PaperLabel className="text-xs">N°:</PaperLabel>
-              <span className="font-mono text-5xl font-bold leading-none tracking-tight">
-                {ficha.nroFicha}
-              </span>
-            </div>
-          }
-        />
-      </PaperFace>
+    <>
+      <ResetLayoutButton />
+      <PaperCard>
+        <PaperFace>
+          <PaperHeader
+            left={<IdentificacionSection value={ficha} />}
+            right={
+              <div className="flex flex-col items-end">
+                <PaperLabel className="text-xs">N°:</PaperLabel>
+                <span className="font-mono text-5xl font-bold leading-none tracking-tight">
+                  {ficha.nroFicha}
+                </span>
+              </div>
+            }
+          />
+        </PaperFace>
 
-      <PaperFace>
-        <PaperBody
-          rightWidthClass={MEDIDAS_COLUMN_WIDTH}
-          left={
-            <div className="flex flex-col gap-4">
-              <RecetaSection value={ficha} />
-              <hr className="border-foreground/30" />
-              <p className="text-xs font-semibold uppercase tracking-wider text-foreground/60">
-                Lejos
-              </p>
-              <LejosCercaSection kind="lejos" value={ficha} />
-              <hr className="border-foreground/30" />
-              <p className="text-xs font-semibold uppercase tracking-wider text-foreground/60">
-                Cerca
-              </p>
-              <LejosCercaSection kind="cerca" value={ficha} />
-            </div>
-          }
-          right={
-            <div className="flex flex-col gap-4">
-              <MedidasSection value={ficha} />
-              <TipoLenteSection value={ficha} />
-            </div>
-          }
-        />
-      </PaperFace>
+        <PaperFace>
+          <PaperBody
+            grid={BODY_RECETA_GRID}
+            left={
+              <div className="flex flex-col gap-4">
+                <RecetaSection value={ficha} />
+                <hr className="border-foreground/30" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-foreground/60">
+                  Lejos
+                </p>
+                <LejosCercaSection kind="lejos" value={ficha} />
+                <hr className="border-foreground/30" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-foreground/60">
+                  Cerca
+                </p>
+                <LejosCercaSection kind="cerca" value={ficha} />
+              </div>
+            }
+            right={
+              <div className="flex flex-col gap-4">
+                <MedidasSection value={ficha} />
+                <TipoLenteSection value={ficha} />
+              </div>
+            }
+          />
+        </PaperFace>
 
-      <PaperFace className="border-b-0">
-        <PaperBody
-          left={<EconomicoSection value={ficha} />}
-          right={<CoberturaSection value={ficha} />}
-        />
-      </PaperFace>
-    </PaperCard>
+        <PaperFace className="border-b-0">
+          <PaperBody
+            grid={BODY_ECONOMICO_GRID}
+            left={<EconomicoSection value={ficha} />}
+            right={<CoberturaSection value={ficha} />}
+          />
+        </PaperFace>
+      </PaperCard>
+    </>
   );
 }

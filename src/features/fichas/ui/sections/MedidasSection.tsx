@@ -15,13 +15,6 @@ interface RowDef {
   label: string;
 }
 
-/**
- * Width of the PaperBody column that hosts this section. Measurements are a
- * few characters each, so the column stays narrow and leaves room for the
- * prescription block on the left.
- */
-export const MEDIDAS_COLUMN_WIDTH = "w-full md:w-80 md:shrink-0";
-
 const ROWS: RowDef[] = [
   { od: "dilOd", oi: "dilOi", label: "D.I.L." },
   { od: "dicOd", oi: "dicOi", label: "D.I.C." },

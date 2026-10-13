@@ -11,12 +11,14 @@ import {
   PaperHeader,
 } from "./paper/PaperLayout";
 import { PaperLabel } from "./paper/PaperField";
+import { ResetLayoutButton } from "./paper/ResetLayoutButton";
+import { BODY_ECONOMICO_GRID, BODY_RECETA_GRID } from "./layout/grids";
 import { Input } from "@/components/ui/input";
 import { CoberturaSection } from "./sections/CoberturaSection";
 import { EconomicoSection } from "./sections/EconomicoSection";
 import { IdentificacionSection } from "./sections/IdentificacionSection";
 import { LejosCercaSection } from "./sections/LejosCercaSection";
-import { MEDIDAS_COLUMN_WIDTH, MedidasSection } from "./sections/MedidasSection";
+import { MedidasSection } from "./sections/MedidasSection";
 import { RecetaSection } from "./sections/RecetaSection";
 import { TipoLenteSection } from "./sections/TipoLenteSection";
 
@@ -51,71 +53,75 @@ export function FichaForm<T extends CreateFichaInput>({
   );
 
   return (
-    <PaperCard>
-      <PaperFace>
-        <PaperHeader
-          left={<IdentificacionSection value={value} onChange={handleChange} />}
-          right={
-            <div className="flex flex-col items-end">
-              <PaperLabel className="text-xs">
-                {value.nroFicha === 0 ? "N°:" : "N° de ficha"}
-              </PaperLabel>
-              {nroFichaEditable ? (
-                <Input
-                  value={value.nroFicha === 0 ? "" : String(value.nroFicha)}
-                  onChange={(event) => {
-                    const digits = event.target.value.replace(/\D/g, "");
-                    handleChange({ nroFicha: digits === "" ? 0 : Number(digits) });
-                  }}
-                  inputMode="numeric"
-                  aria-label="Número de ficha"
-                  placeholder="—"
-                  autoFocus
-                  className="h-14 w-44 rounded-none border-x-0 border-t-0 border-b border-dashed border-foreground/40 bg-transparent px-1 text-right font-mono text-5xl font-bold tracking-tight shadow-none focus-visible:border-solid focus-visible:border-foreground focus-visible:ring-0 md:text-5xl"
-                />
-              ) : (
-                <span className="font-mono text-5xl font-bold leading-none tracking-tight">
-                  {value.nroFicha === 0 ? "—" : value.nroFicha}
-                </span>
-              )}
-            </div>
-          }
-        />
-      </PaperFace>
+    <>
+      <ResetLayoutButton />
+      <PaperCard>
+        <PaperFace>
+          <PaperHeader
+            left={<IdentificacionSection value={value} onChange={handleChange} />}
+            right={
+              <div className="flex flex-col items-end">
+                <PaperLabel className="text-xs">
+                  {value.nroFicha === 0 ? "N°:" : "N° de ficha"}
+                </PaperLabel>
+                {nroFichaEditable ? (
+                  <Input
+                    value={value.nroFicha === 0 ? "" : String(value.nroFicha)}
+                    onChange={(event) => {
+                      const digits = event.target.value.replace(/\D/g, "");
+                      handleChange({ nroFicha: digits === "" ? 0 : Number(digits) });
+                    }}
+                    inputMode="numeric"
+                    aria-label="Número de ficha"
+                    placeholder="—"
+                    autoFocus
+                    className="h-14 w-44 rounded-none border-x-0 border-t-0 border-b border-dashed border-foreground/40 bg-transparent px-1 text-right font-mono text-5xl font-bold tracking-tight shadow-none focus-visible:border-solid focus-visible:border-foreground focus-visible:ring-0 md:text-5xl"
+                  />
+                ) : (
+                  <span className="font-mono text-5xl font-bold leading-none tracking-tight">
+                    {value.nroFicha === 0 ? "—" : value.nroFicha}
+                  </span>
+                )}
+              </div>
+            }
+          />
+        </PaperFace>
 
-      <PaperFace>
-        <PaperBody
-          rightWidthClass={MEDIDAS_COLUMN_WIDTH}
-          left={
-            <div className="flex flex-col gap-4">
-              <RecetaSection value={value} onChange={handleChange} />
-              <hr className="border-foreground/30" />
-              <p className="text-xs font-semibold uppercase tracking-wider text-foreground/60">
-                Lejos
-              </p>
-              <LejosCercaSection kind="lejos" value={value} onChange={handleChange} />
-              <hr className="border-foreground/30" />
-              <p className="text-xs font-semibold uppercase tracking-wider text-foreground/60">
-                Cerca
-              </p>
-              <LejosCercaSection kind="cerca" value={value} onChange={handleChange} />
-            </div>
-          }
-          right={
-            <div className="flex flex-col gap-4">
-              <MedidasSection value={value} onChange={handleChange} />
-              <TipoLenteSection value={value} onChange={handleChange} />
-            </div>
-          }
-        />
-      </PaperFace>
+        <PaperFace>
+          <PaperBody
+            grid={BODY_RECETA_GRID}
+            left={
+              <div className="flex flex-col gap-4">
+                <RecetaSection value={value} onChange={handleChange} />
+                <hr className="border-foreground/30" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-foreground/60">
+                  Lejos
+                </p>
+                <LejosCercaSection kind="lejos" value={value} onChange={handleChange} />
+                <hr className="border-foreground/30" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-foreground/60">
+                  Cerca
+                </p>
+                <LejosCercaSection kind="cerca" value={value} onChange={handleChange} />
+              </div>
+            }
+            right={
+              <div className="flex flex-col gap-4">
+                <MedidasSection value={value} onChange={handleChange} />
+                <TipoLenteSection value={value} onChange={handleChange} />
+              </div>
+            }
+          />
+        </PaperFace>
 
-      <PaperFace className="border-b-0">
-        <PaperBody
-          left={<EconomicoSection value={value} onChange={handleChange} />}
-          right={<CoberturaSection value={value} onChange={handleChange} />}
-        />
-      </PaperFace>
-    </PaperCard>
+        <PaperFace className="border-b-0">
+          <PaperBody
+            grid={BODY_ECONOMICO_GRID}
+            left={<EconomicoSection value={value} onChange={handleChange} />}
+            right={<CoberturaSection value={value} onChange={handleChange} />}
+          />
+        </PaperFace>
+      </PaperCard>
+    </>
   );
 }
