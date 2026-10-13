@@ -3,7 +3,9 @@
 import type { CreateFichaInput, Ficha } from "../../domain/ficha.types";
 
 import { PaperDateField } from "../paper/PaperDateField";
+import { RECETA_GRID } from "../layout/grids";
 import { PaperField } from "../paper/PaperField";
+import { ResizableGrid } from "../paper/ResizableGrid";
 
 interface RecetaSectionProps {
   value: CreateFichaInput;
@@ -14,7 +16,7 @@ export function RecetaSection({ value, onChange }: RecetaSectionProps) {
   const editable = onChange !== undefined;
   const update = (patch: Partial<Ficha>) => onChange?.(patch);
   return (
-    <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
+    <ResizableGrid grid={RECETA_GRID} tabStops>
       <PaperDateField
         mode={editable ? "edit" : "read"}
         label="Receta Fecha:"
@@ -31,6 +33,6 @@ export function RecetaSection({ value, onChange }: RecetaSectionProps) {
             }
           : {})}
       />
-    </div>
+    </ResizableGrid>
   );
 }

@@ -33,6 +33,7 @@ export function LejosCercaSection({ kind, value, onChange }: LejosCercaSectionPr
     <div className="flex flex-col gap-3">
       <OjoGraduacionBlock
         label="O. D."
+        tabStops={kind === "lejos"}
         value={block.od}
         onChange={onChange ? (next) => updateBlock({ od: next }) : undefined}
       />
@@ -43,6 +44,7 @@ export function LejosCercaSection({ kind, value, onChange }: LejosCercaSectionPr
       />
       <div className="border-t border-dashed border-foreground/30" />
       <OjoArmazonBlock
+        tabStops={kind === "lejos"}
         value={block.armazon}
         onChange={onChange ? (next) => updateBlock({ armazon: next }) : undefined}
       />

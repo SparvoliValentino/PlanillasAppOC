@@ -7,13 +7,17 @@ import type {
   OrigenLente,
 } from "../../domain/ficha.types";
 
+import { ARMAZON_GRID, GRADUACION_GRID } from "../layout/grids";
 import { PaperCheckbox } from "../paper/PaperCheckbox";
 import { PaperField } from "../paper/PaperField";
+import { ResizableGrid } from "../paper/ResizableGrid";
 
 interface OjoGraduacionBlockProps {
   label: string;
   value: OjoGraduacion;
   onChange?: (next: OjoGraduacion) => void;
+  /** Only one row per logical grid needs to be reachable with Tab. */
+  tabStops?: boolean;
 }
 
 /**
@@ -21,11 +25,16 @@ interface OjoGraduacionBlockProps {
  *
  *   O.D.  Esf __________  Cil __________  a __________
  */
-export function OjoGraduacionBlock({ label, value, onChange }: OjoGraduacionBlockProps) {
+export function OjoGraduacionBlock({
+  label,
+  value,
+  onChange,
+  tabStops,
+}: OjoGraduacionBlockProps) {
   const editable = onChange !== undefined;
   const update = (patch: Partial<OjoGraduacion>) => onChange?.({ ...value, ...patch });
   return (
-    <div className="grid grid-cols-[auto_1fr_1fr_auto_1fr] items-baseline gap-x-2 text-sm">
+    <ResizableGrid grid={GRADUACION_GRID} tabStops={tabStops} className="items-baseline text-sm">
       <span className="italic text-foreground/80">{label}</span>
       <PaperField
         label="Esf"
@@ -62,13 +71,14 @@ export function OjoGraduacionBlock({ label, value, onChange }: OjoGraduacionBloc
           : {})}
         mono
       />
-    </div>
+    </ResizableGrid>
   );
 }
 
 interface OjoArmazonBlockProps {
   value: OjoArmazon;
   onChange?: (next: OjoArmazon) => void;
+  tabStops?: boolean;
 }
 
 /**
@@ -78,11 +88,11 @@ interface OjoArmazonBlockProps {
  *   ☐ ORGANICO  ☐ LABOR       MODELO  ____________
  *                                Color ____________
  */
-export function OjoArmazonBlock({ value, onChange }: OjoArmazonBlockProps) {
+export function OjoArmazonBlock({ value, onChange, tabStops }: OjoArmazonBlockProps) {
   const editable = onChange !== undefined;
   const update = (patch: Partial<OjoArmazon>) => onChange?.({ ...value, ...patch });
   return (
-    <div className="grid grid-cols-[auto_auto_1fr] items-center gap-x-6 gap-y-2">
+    <ResizableGrid grid={ARMAZON_GRID} tabStops={tabStops} className="items-center gap-y-2">
       <PaperCheckbox
         label="MINERAL"
         checked={value.material === "MINERAL"}
@@ -143,6 +153,6 @@ export function OjoArmazonBlock({ value, onChange }: OjoArmazonBlockProps) {
           ? { onChange: (next) => update({ color: next }) }
           : { placeholder: "Color" })}
       />
-    </div>
+    </ResizableGrid>
   );
 }

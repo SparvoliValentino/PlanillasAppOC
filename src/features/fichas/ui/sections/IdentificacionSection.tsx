@@ -3,7 +3,9 @@
 import type { CreateFichaInput, Ficha } from "../../domain/ficha.types";
 
 import { PaperDateField } from "../paper/PaperDateField";
+import { CONTACTO_GRID, IDENTIFICACION_GRID } from "../layout/grids";
 import { PaperField } from "../paper/PaperField";
+import { ResizableGrid } from "../paper/ResizableGrid";
 
 interface IdentificacionSectionProps {
   value: CreateFichaInput;
@@ -22,7 +24,7 @@ export function IdentificacionSection({ value, onChange }: IdentificacionSection
   const update = (patch: Partial<Ficha>) => onChange?.(patch);
 
   return (
-    <div className="grid grid-cols-1 gap-x-6 gap-y-2 md:grid-cols-2">
+    <ResizableGrid grid={IDENTIFICACION_GRID} tabStops className="gap-y-2">
       <PaperField
         label="Nombre:"
         value={value.nombre}
@@ -51,7 +53,7 @@ export function IdentificacionSection({ value, onChange }: IdentificacionSection
             }
           : {})}
       />
-      <div className="grid grid-cols-2 gap-x-6">
+      <ResizableGrid grid={CONTACTO_GRID} tabStops>
         <PaperField
           label="Tel.:"
           value={value.tel}
@@ -74,13 +76,13 @@ export function IdentificacionSection({ value, onChange }: IdentificacionSection
               }
             : {})}
         />
-      </div>
+      </ResizableGrid>
       <PaperDateField
         mode={editable ? "edit" : "read"}
         label="Fecha Entrada:"
         value={value.fechaEntrada}
         {...(editable ? { onChange: (next) => update({ fechaEntrada: next }) } : {})}
       />
-    </div>
+    </ResizableGrid>
   );
 }

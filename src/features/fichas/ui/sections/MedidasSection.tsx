@@ -2,7 +2,9 @@
 
 import type { CreateFichaInput, Ficha, Medidas } from "../../domain/ficha.types";
 
+import { MEDIDAS_GRID } from "../layout/grids";
 import { PaperField } from "../paper/PaperField";
+import { ResizableGrid } from "../paper/ResizableGrid";
 
 interface MedidasSectionProps {
   value: CreateFichaInput;
@@ -39,10 +41,12 @@ export function MedidasSection({ value, onChange }: MedidasSectionProps) {
   };
   return (
     <div className="flex flex-col gap-2">
-      {ROWS.map(({ od, oi, label }) => (
-        <div
+      {ROWS.map(({ od, oi, label }, index) => (
+        <ResizableGrid
           key={od}
-          className="grid grid-cols-[4.5rem_2rem_minmax(0,1fr)_2rem_minmax(0,1fr)] items-baseline gap-x-2 text-sm"
+          grid={MEDIDAS_GRID}
+          tabStops={index === 0}
+          className="items-baseline text-sm"
         >
           <span className="italic text-foreground/80">{label}</span>
           <span className="text-right italic text-foreground/60">O.D.</span>
@@ -69,7 +73,7 @@ export function MedidasSection({ value, onChange }: MedidasSectionProps) {
               : {})}
             mono
           />
-        </div>
+        </ResizableGrid>
       ))}
     </div>
   );
